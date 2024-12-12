@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use itertools::Itertools;
+use std::collections::HashSet;
 use aoc_runner_derive::{aoc, aoc_generator};
 
 #[aoc_generator(day6)]
@@ -10,47 +10,70 @@ pub fn input_generator(input: &str) -> Vec<String> {
 #[aoc(day6, part1)]
 pub fn solve_part1(input: &[String]) -> i32 {
     let map = create_map(input);
-    let initial_pos = map.iter()
-                         .find(|&(_, &value)| value != '.' && value != '#')
-                         .map(|(&position, _)| position);
-
-    //print map, line bt line
-    let mut last_x = 0;
-
-    for (&(x, _), &value) in map.iter().sorted_by_key(|(&(x, y), _)| (x, y)) {
-        if x != last_x {
-            println!();
-            last_x = x;
+    let mut positions: HashSet<(i16, i16)> = HashSet::new();
+    let (mut position, ch) = map.iter()
+                            .find(|&(_, &value)| value != '.' && value != '#')
+                            .map(|(&position, &value)| (position, value))
+                            .unwrap();
+    let mut direction = get_direction(&ch);
+    positions.insert(position);
+    
+    loop {
+        let next_position = (position.0 + direction.0, position.1 + direction.1);
+    
+        if !map.contains_key(&next_position) {
+            break; 
         }
-        print!("{} ", value);
+    
+        if let Some(&next_value) = map.get(&next_position) {
+            if next_value == '#' {
+                direction = rotate_90(direction); 
+            } else {
+                position = next_position;
+                positions.insert(position);
+            }
+        }
     }
-    println!();
-    0
+    
+   
+
+    positions.len() as i32
 }
 
 #[aoc(day6, part2)]
-pub fn solve_part2(input: &[String]) -> i32 {
+pub fn solve_part2(_input: &[String]) -> i32 {
     0
 }
 
 fn create_map(input: &[String]) -> HashMap<(i16, i16), char> {
     let mut map = HashMap::new();
-    for (y, line) in input.iter().enumerate() {
-        for (x, ch) in line.chars().enumerate() {
-            map.insert((x as i16, y as i16), ch);
+    for (row, line) in input.iter().enumerate() {
+        for (col, ch) in line.chars().enumerate() {
+            map.insert(((row + 1) as i16, (col + 1) as i16), ch);
         }
     }
     map
 }
 
 fn get_direction(value: &char) -> (i16, i16) {
-    if value == '>'
-        (1,0)
-    else if value == '<'
-        (-1,0)
-    else if value == 'v'
+    if *value == '>' {
         (0,1)
-    else if value == '^'
+    } else if *value == '<' {
         (0,-1)
-    else (0,0)
+    } else if *value == 'v' {
+        (1,0)
+    } else if *value == '^' {
+        (-1,0)
+    } else {
+        (0,0) 
+    }
+}
+fn rotate_90(direction: (i16, i16)) -> (i16, i16) {
+    match direction {
+        (0, 1) => (1, 0),  
+        (1, 0) => (0, -1), 
+        (0, -1) => (-1, 0),
+        (-1, 0) => (0, 1), 
+        _ => (0, 0),       
+    }
 }
