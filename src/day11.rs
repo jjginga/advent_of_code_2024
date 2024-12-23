@@ -75,49 +75,6 @@ fn count_stones(
     count
 }
 
-/*
-#[aoc(day11, part2)]
-pub fn solve_part2(input: &[String]) -> usize {
-    let mut stones: VecDeque<u64> = input[0]
-        .split_whitespace()
-        .map(|x| x.parse::<u64>().unwrap())
-        .collect();
-
-    let cache: DashMap<u64, Vec<u64>> = DashMap::new();
-
-    for i in 0..75 {
-        let buffer = Mutex::new(VecDeque::new());
-
-        stones.par_iter().for_each(|&stone| {
-            let mut local_result = Vec::new();
-
-            if let Some(cached_result) = cache.get(&stone) {
-                local_result.extend(cached_result.clone());
-            } else {
-                let result = if stone == 0 {
-                    vec![process_zero(stone)]
-                } else if is_even_digits(stone) {
-                    let (left, right) = split_stones(stone);
-                    vec![left, right]
-                } else {
-                    vec![process_oder(stone)]
-                };
-                cache.insert(stone, result.clone());
-                local_result.extend(result);
-            }
-
-            let mut buffer_guard = buffer.lock().unwrap();
-            buffer_guard.extend(local_result);
-        });
-
-        stones = buffer.into_inner().unwrap();
-
-       //println!("{}: {}", i, stones.len());
-    }
-
-    stones.len()
-}
-*/
 
 fn process_zero(stone: u64) -> u64 {
     stone + 1
