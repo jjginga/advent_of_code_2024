@@ -1,11 +1,10 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use std::sync::Arc;
-use rayon::prelude::*;
 use std::collections::BinaryHeap;
 use std::cmp::Reverse;
+use rayon::prelude::*; //parallel processing
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
-
 
 #[derive(Clone, Debug)]
 pub enum SymExpr{
@@ -321,13 +320,14 @@ fn eval_expr(expr: &SymExpr, a0: u64) -> u64 {
 
 
 fn solve_constraints(constraints: &[Constraint], program: &Vec<u8>) -> Option<u64> {
-    let attempt_max = u64::MAX; // 16,777,216
+    let base_value = compute_base_value(program);
     let (instruction, operand) = parse_instruction(&program, 0); //parse the first instruction and operand
     let program_len = program.len();
     
 
-    //(u32::MAX as u64..=attempt_max).into_par_iter()
-    (1..=attempt_max).into_par_iter()
+    (base_value..).step_by(8)
+        .par_bridge()
+        
         .find_any(|&candidate_a0| {
             let is_valid_constraints = constraints.iter().try_fold(true, |_, constraint| {
                 if eval_expr(&constraint.expr, candidate_a0) != constraint.expected {
@@ -350,6 +350,10 @@ fn solve_constraints(constraints: &[Constraint], program: &Vec<u8>) -> Option<u6
         })
 }
 
+fn compute_base_value(program: &[u8]) -> u64 {
+    let octal_string: String = program.iter().map(|&num| num.to_string()).collect();
+    u64::from_str_radix(&octal_string, 8).unwrap()
+}
 
 pub fn compute<'a>(
     instruction: u8,
