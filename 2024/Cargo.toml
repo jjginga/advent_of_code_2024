@@ -10,6 +10,7 @@ regex = "1"
 itertools = "0.13.0"
 rayon = "1.7.0"
 dashmap = "5.3.0"
+phf = { version = "0.10", features = ["macros"] }
 
 [build-dependencies]
 aoc-runner-derive = "0.3"
